@@ -24,3 +24,18 @@
   - <%= tag %>
   <%- end -%>
 <% end -%>
+<% if @metric_filters -%>
+:metric_filters:
+<%- @metric_filters.each do |filter| -%>
+  - <%= filter %>
+  <%- end -%>
+<% end -%>
+<% if @pe_event_reporting -%>
+:pe_event_types:
+<%- @pe_event_types.each do |type| -%>
+  - <%= type %>
+  <%- end -%>
+<% end -%>
+<% if @host -%>
+:pe_console: <%= @host %>
+<% end -%>
