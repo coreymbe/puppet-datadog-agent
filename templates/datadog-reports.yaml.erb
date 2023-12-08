@@ -3,6 +3,9 @@
 ---
 :datadog_api_key: '<%= @api_key %>'
 :api_url: <%= @datadog_site %>
+<% if @host -%>
+:pe_console: <%= @host %>
+<% end -%>
 <% if @hostname_extraction_regex -%>
 :hostname_extraction_regex: '<%= @hostname_extraction_regex %>'
 <% end -%>
@@ -24,9 +27,9 @@
   - <%= tag %>
   <%- end -%>
 <% end -%>
-<% if @metric_filters -%>
+<% if @puppet_metric_filters -%>
 :metric_filters:
-<%- @metric_filters.each do |filter| -%>
+<%- @puppet_metric_filters.each do |filter| -%>
   - <%= filter %>
   <%- end -%>
 <% end -%>
@@ -35,7 +38,4 @@
 <%- @pe_event_types.each do |type| -%>
   - <%= type %>
   <%- end -%>
-<% end -%>
-<% if @host -%>
-:pe_console: <%= @host %>
 <% end -%>

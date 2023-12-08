@@ -1,18 +1,18 @@
 #!/opt/puppetlabs/puppet/bin/ruby
-
 require 'json'
 require 'dogapi'
+require 'yaml'
 
 configfile = '/etc/datadog-agent/datadog-reports.yaml'
 settings = YAML.load_file(configfile)
-
 server = settings[:pe_console]
+
 api_key    = settings[:datadog_api_key]
 api_url    = settings[:api_url]
+dog = Dogapi::Client.new(api_key, nil, server, nil, nil, nil, api_url)
 
 data_path = ARGV[0]
 data = JSON.parse(File.read(data_path))
-dog = Dogapi::Client.new(api_key, nil, server, nil, nil, nil, api_url)
 
 events = {
   'orchestrator' => 'PE Orchestrator',
@@ -23,6 +23,7 @@ events = {
 }
 
 event_types = events.select { |type| settings[:pe_event_types].include? type }
+
 event_types.each do |index, service|
   # A nil value indicates that there were no new events.
   # A negative value indicates that the sourcetype has been disabled from the pe_event_forwarding module.
@@ -32,11 +33,11 @@ event_types.each do |index, service|
     event_title = "Puppet #{service} Event"
     res = dog.emit_event(Dogapi::Event.new(event,
                                      msg_title: event_title,
-                                     event_type: "puppet.#{index}",
+                                     event_type: "puppet-#{index}",
                                      alert_type: 'info',
                                      priority: 'low',
-                                     source_type_name: 'puppet'),
-                  host: server)
+                                     source_type_name: 'puppet'
+                                     ))
     if res[0] != 202
       puts "#{service} event sent to Datadog"
     else

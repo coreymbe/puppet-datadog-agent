@@ -20,9 +20,6 @@ class datadog_agent::reports(
   $puppetmaster_user,
   $dogapi_version,
   $host,
-  $metric_filters,
-  $pe_event_reporting,
-  $pe_event_types,
   $manage_dogapi_gem = true,
   $hostname_extraction_regex = undef,
   $proxy_http = undef,
@@ -31,6 +28,9 @@ class datadog_agent::reports(
   $report_trusted_fact_tags = [],
   $datadog_site = 'https://api.datadoghq.com',
   $puppet_gem_provider = $datadog_agent::params::gem_provider,
+  $puppet_metric_filters = undef,
+  $pe_event_reporting = false,
+  $pe_event_types = [],
 ) inherits datadog_agent::params {
 
   if ($facts['os']['name'] == 'Windows') {

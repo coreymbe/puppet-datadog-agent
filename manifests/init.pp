@@ -270,11 +270,13 @@ class datadog_agent(
   Array $facts_to_tags = [],
   Array $trusted_facts_to_tags = [],
   Boolean $puppet_run_reports = false,
-  Boolean $pe_event_reporting = false,
-  Array $pe_event_types = ['orchestrator','rbac','classifier','pe-console','code-manager'],
   String $reports_url = "https://api.${datadog_site}",
   String $puppetmaster_user = $settings::user,
   String $puppet_gem_provider = $datadog_agent::params::gem_provider,
+  Boolean $pe_event_reporting = false,
+  Boolean $pe_service_checks = false,
+  Optional[Array] $pe_event_types = ['orchestrator','rbac','classifier','pe-console','code-manager'],
+  Optional[Array] $puppet_metric_filters = undef,
   Boolean $non_local_traffic = false,
   Array $dogstreams = [],
   String $log_level = 'info',
@@ -290,7 +292,6 @@ class datadog_agent(
   $dogstatsd_socket = '',
   Array $report_fact_tags = [],
   Array $report_trusted_fact_tags = [],
-  Optional[Array] $metric_filters = undef,
   String $statsd_forward_host = '',
   Variant[Stdlib::Port, Pattern[/^\d*$/]] $statsd_forward_port = '',
   String $statsd_histogram_percentiles = '0.95',
@@ -826,15 +827,18 @@ class datadog_agent(
       proxy_https               => $proxy_https,
       report_fact_tags          => $report_fact_tags,
       report_trusted_fact_tags  => $report_trusted_fact_tags,
-      metric_filters            => $metric_filters,
-      pe_event_types            => $pe_event_types,
-      pe_event_reporting        => $pe_event_reporting,
       host                      => $host,
+      puppet_metric_filters     => $puppet_metric_filters,
+      pe_event_reporting        => $pe_event_reporting,
+      pe_event_types            => $pe_event_types,
     }
   }
 
-  if $pe_event_reporting {
-    include datadog_agent::pe_event_forwarding
+  if ($pe_event_reporting or $pe_service_checks) {
+    class { 'datadog_agent::puppet_enterprise':
+      event_reporting => $pe_event_reporting,
+      service_checks  => $pe_service_checks,
+    }
   }
 
   create_resources('datadog_agent::integration', $local_integrations)
